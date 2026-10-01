@@ -22,7 +22,7 @@ Keeps a managed portfolio between WBNB and a test stablecoin at a target weight 
 | Message | Result |
 |---|---|
 | `status` | balances, weights, price, drift, last action |
-| `rebalance to 60/40` (first number = WBNB %) | runs the rebalance, returns tx hash and before/after |
+| `rebalance to 60/40` (first number = WBNB %) | public callers: returns the rebalance plan (dry run). Owner (`Authorization: Bearer <CRON_SECRET>`): executes it and returns tx hash and before/after |
 | any text with a `0x...` address | read-only split of that address and the suggested swap (never executes) |
 
 **Limitation:** there is no database. The target comes from `TARGET_WBNB_PCT` (env) or from the request itself; it is not remembered between requests. "Last action" lives in instance memory only (best effort on serverless). Executions are rate limited per instance (`MIN_EXEC_INTERVAL_SEC`).
@@ -79,4 +79,4 @@ Import the repo (no framework). Set `AGENT_PRIVATE_KEY`, `PUBLIC_BASE_URL`, `CRO
 
 ## Risks
 
-Testnet liquidity is thin and prices differ from mainnet (the chosen pair prices BNB far from market). Swaps use slippage protection and a per-tx cap, but anyone can ask the agent to rebalance (limited by the drift threshold, the cap and the rate limit).
+Testnet liquidity is thin and prices differ from mainnet (the chosen pair prices BNB far from market). Swaps use slippage protection and a per-tx cap, and only the owner (or the daily cron) can make the agent send a swap; public A2A calls get the plan only.

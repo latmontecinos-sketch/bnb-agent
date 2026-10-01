@@ -51,7 +51,7 @@ export async function a2a(req: Request) {
   } catch {
     return json({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } }, 400);
   }
-  return json(await handleRpc(body));
+  return json(await handleRpc(body, { allowExecute: authorized(req) }));
 }
 
 function authorized(req: Request) {
