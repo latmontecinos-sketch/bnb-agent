@@ -5,7 +5,7 @@ ERC-8004 AI agent for the BNB Chain "Set and Earn" campaign.
 - **Category:** rebalancing
 - **Chain:** BNB Smart Chain testnet (chain 97). Testnet only, no real funds.
 - **Identity Registry:** `0x8004A818BFB912233c491871b3d84c89A494BD9e` (`eip155:97:0x8004A818BFB912233c491871b3d84c89A494BD9e`)
-- **Agent ID:** `<pending>`
+- **Agent ID:** `2545` (ERC-8004 Identity Registry `0x8004A818BFB912233c491871b3d84c89A494BD9e`, BSC testnet chain 97) — [registration tx](https://testnet.bscscan.com/tx/0x6f633daf74752baba0eaaab28089c5b430291f255a31ca2cdd84069d0072c410) · [NFT](https://testnet.bscscan.com/nft/0x8004A818BFB912233c491871b3d84c89A494BD9e/2545)
 - **Operating wallet:** `0x5375f369Bc68b1a930c3942e7DfC09A32217F728` (the agent signs with its own key; fund it with tBNB and the faucet test stable to see swaps)
 
 ## What it does

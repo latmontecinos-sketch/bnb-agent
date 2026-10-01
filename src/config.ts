@@ -31,7 +31,7 @@ export const cfg = () => {
     stableOverride: env("STABLE_TOKEN"),
     executionEnabled: (env("EXECUTION_ENABLED") ?? "true") !== "false",
     minExecIntervalSec: num("MIN_EXEC_INTERVAL_SEC", 300),
-    agentId: env("AGENT_ID"),
+    agentId: env("AGENT_ID") ?? "2545",
     cronSecret: env("CRON_SECRET"),
     baseUrl: (env("PUBLIC_BASE_URL") ?? (prod ? `https://${prod}` : "https://YOUR-DOMAIN.vercel.app")).replace(/\/$/, ""),
   };
