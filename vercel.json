@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/.well-known/agent-card.json", "destination": "/api/agent-card" },
+    { "source": "/.well-known/agent-registration.json", "destination": "/api/agent-registration" },
+    { "source": "/register", "destination": "/register.html" }
+  ],
+  "crons": [{ "path": "/api/cron/rebalance", "schedule": "0 12 * * *" }]
+}

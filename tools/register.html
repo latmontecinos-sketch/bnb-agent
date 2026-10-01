@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Register agent (ERC-8004, BSC testnet)</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem;background:#0b0e11;color:#eaecef}
+  input,button{font:inherit;padding:.6rem .8rem;border-radius:8px;border:1px solid #444;background:#181a20;color:inherit;width:100%;box-sizing:border-box;margin:.3rem 0}
+  button{background:#f0b90b;color:#000;border:0;cursor:pointer;font-weight:600}
+  button.sec{background:#2b3139;color:#eaecef}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  code,pre{background:#181a20;padding:.2rem .4rem;border-radius:4px;word-break:break-all;white-space:pre-wrap}
+  .box{border:1px solid #2b3139;border-radius:10px;padding:1rem;margin:1rem 0}
+  small{color:#848e9c}
+</style>
+</head>
+<body>
+<h1>Register agent on ERC-8004</h1>
+<p><small>BSC testnet (chain 97). Identity Registry <code id="reg"></code>. You sign with your own wallet; nothing is sent until you confirm in it.</small></p>
+
+<div class="box">
+  <button id="connect">1. Connect wallet</button>
+  <div id="acct"><small>Not connected.</small></div>
+</div>
+
+<div class="box">
+  <label>agentURI (registration file)</label>
+  <input id="uri" value="https://YOUR-DOMAIN.vercel.app/.well-known/agent-registration.json" />
+  <button id="register" disabled>2. register(agentURI)</button>
+  <div id="out"></div>
+</div>
+
+<div class="box">
+  <h3>Optional: set agent wallet</h3>
+  <small>Run <code>npm run sign-agent-wallet -- &lt;agentId&gt; &lt;your registering address&gt;</code> locally (offline signature, the agent key never leaves your machine), then paste the values. The deadline is short (a few minutes), so submit right away.</small>
+  <input id="awId" placeholder="agentId" />
+  <input id="awWallet" placeholder="newWallet (agent address)" />
+  <input id="awDeadline" placeholder="deadline" />
+  <input id="awSig" placeholder="signature 0x..." />
+  <button id="setWallet" class="sec" disabled>setAgentWallet(agentId, newWallet, deadline, signature)</button>
+  <div id="out2"></div>
+</div>
+
+<script type="module">
+import { createPublicClient, createWalletClient, custom, http, parseAbi, decodeEventLog } from "https://esm.sh/viem@2";
+
+const REGISTRY = "0x8004A818BFB912233c491871b3d84c89A494BD9e";
+const CHAIN = { id: 97, name: "BNB Smart Chain Testnet", nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
+  rpcUrls: { default: { http: ["https://data-seed-prebsc-1-s1.bnbchain.org:8545"] } },
+  blockExplorers: { default: { name: "BscScan", url: "https://testnet.bscscan.com" } } };
+// Signatures verified against erc-8004/erc-8004-contracts IdentityRegistryUpgradeable v2.0.0 (also confirmed via getVersion() on testnet).
+const abi = parseAbi([
+  "function register(string agentURI) returns (uint256 agentId)",
+  "function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature)",
+  "function getAgentWallet(uint256 agentId) view returns (address)",
+  "event Registered(uint256 indexed agentId, string agentURI, address indexed owner)",
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+]);
+
+const $ = (id) => document.getElementById(id);
+$("reg").textContent = REGISTRY;
+const pub = createPublicClient({ chain: CHAIN, transport: http() });
+let wallet, account;
+
+const link = (h) => `<a style="color:#f0b90b" target="_blank" href="${CHAIN.blockExplorers.default.url}/tx/${h}">${h}</a>`;
+
+async function ensureChain() {
+  const id = parseInt(await window.ethereum.request({ method: "eth_chainId" }), 16);
+  if (id === 97) return true;
+  try {
+    await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x61" }] });
+  } catch (e) {
+    if (e.code === 4902) {
+      await window.ethereum.request({ method: "wallet_addEthereumChain", params: [{ chainId: "0x61", chainName: CHAIN.name,
+        nativeCurrency: CHAIN.nativeCurrency, rpcUrls: CHAIN.rpcUrls.default.http, blockExplorerUrls: [CHAIN.blockExplorers.default.url] }] });
+    } else throw e;
+  }
+  return parseInt(await window.ethereum.request({ method: "eth_chainId" }), 16) === 97;
+}
+
+$("connect").onclick = async () => {
+  if (!window.ethereum) { $("acct").textContent = "No injected wallet found (open in a browser with Rabby/MetaMask)."; return; }
+  const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
+  if (!(await ensureChain())) { $("acct").textContent = "Switch to BSC testnet (97) to continue."; return; }
+  account = addr;
+  wallet = createWalletClient({ account, chain: CHAIN, transport: custom(window.ethereum) });
+  $("acct").innerHTML = `Connected: <code>${addr}</code> on chain 97`;
+  $("register").disabled = false; $("setWallet").disabled = false;
+};
+
+$("register").onclick = async () => {
+  try {
+    if (!(await ensureChain())) throw new Error("Wrong network: switch to chain 97");
+    const uri = $("uri").value.trim();
+    if (!/^https:\/\//.test(uri) || uri.includes("YOUR-DOMAIN")) throw new Error("Set a real https agentURI first");
+    $("out").textContent = "Confirm in your wallet...";
+    const hash = await wallet.writeContract({ address: REGISTRY, abi, functionName: "register", args: [uri] });
+    $("out").innerHTML = `Sent: ${link(hash)}<br/>Waiting for confirmation...`;
+    const rc = await pub.waitForTransactionReceipt({ hash });
+    let agentId;
+    for (const log of rc.logs) {
+      if (log.address.toLowerCase() !== REGISTRY.toLowerCase()) continue;
+      try {
+        const ev = decodeEventLog({ abi, data: log.data, topics: log.topics });
+        if (ev.eventName === "Registered") { agentId = ev.args.agentId; break; }
+        if (ev.eventName === "Transfer" && agentId === undefined) agentId = ev.args.tokenId;
+      } catch {}
+    }
+    $("out").innerHTML = rc.status === "success"
+      ? `Registered. <b>Agent ID: ${agentId}</b><br/>Tx: ${link(hash)}<br/><small>Put it in AGENT_ID (Vercel env) and in the README.</small>`
+      : `Reverted: ${link(hash)}`;
+  } catch (e) { $("out").textContent = "Error: " + (e.shortMessage || e.message); }
+};
+
+$("setWallet").onclick = async () => {
+  try {
+    if (!(await ensureChain())) throw new Error("Wrong network: switch to chain 97");
+    $("out2").textContent = "Confirm in your wallet...";
+    const hash = await wallet.writeContract({ address: REGISTRY, abi, functionName: "setAgentWallet",
+      args: [BigInt($("awId").value), $("awWallet").value.trim(), BigInt($("awDeadline").value), $("awSig").value.trim()] });
+    const rc = await pub.waitForTransactionReceipt({ hash });
+    $("out2").innerHTML = (rc.status === "success" ? "Agent wallet set. " : "Reverted. ") + link(hash);
+  } catch (e) { $("out2").textContent = "Error: " + (e.shortMessage || e.message); }
+};
+</script>
+</body>
+</html>

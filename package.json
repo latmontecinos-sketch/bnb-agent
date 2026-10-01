@@ -1,0 +1,29 @@
+{
+  "name": "aex-rebalancer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aex Rebalancer: ERC-8004 rebalancing agent (WBNB / test stable) on BSC testnet",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "gen-wallet": "tsx scripts/gen-wallet.ts",
+    "status": "tsx src/cli.ts status",
+    "rebalance": "tsx src/cli.ts rebalance",
+    "sign-agent-wallet": "tsx scripts/sign-agent-wallet.ts",
+    "dev": "tsx scripts/local-server.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && node scripts/copy-tools.mjs",
+    "test": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "viem": "^2.57.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
