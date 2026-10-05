@@ -90,6 +90,16 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 479px) { .toplinks a.hide-sm { display: none; } }
 @media (max-width: 419px) { .toplinks a:not(:last-child) { display: none; } }
 
+.topright { display: flex; align-items: center; gap: 16px; }
+.lang { display: inline-flex; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; flex: none; }
+.lang button { font: 500 11px var(--font-mono); letter-spacing: .05em; padding: 0 9px; height: 32px; min-width: 32px; background: transparent; color: var(--muted); border: 0; cursor: pointer; transition: background-color .15s, color .15s; }
+.lang button + button { border-left: 1px solid var(--border); }
+.lang button:hover { color: var(--text); }
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.lang button:focus-visible { outline-offset: -3px; }
+@media (max-width: 419px) { .topright { gap: 10px; } .brand { gap: 8px; font-size: 13px; letter-spacing: .01em; } .brand img { width: 24px; height: 24px; } .top .wrap { gap: 8px; } .toplinks { font-size: 11px; } }
+@media (max-width: 349px) { .brand-name { display: none; } }
+
 /* hero */
 .hero { padding: 48px 0 40px; }
 @media (min-width: 640px) { .hero { padding: 80px 0 56px; } }
@@ -228,50 +238,56 @@ footer a { color: var(--text); text-underline-offset: 3px; }
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
 
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="/"><img src="/logo.svg" alt="" width="28" height="28"><span>Aex Rebalancer</span></a>
-    <nav class="toplinks" aria-label="Page">
-      <a class="hide-sm" href="#portfolio">Live</a>
-      <a class="hide-sm" href="#how">How it works</a>
-      <a href="#integrate">Integrate</a>
-      <a href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">GitHub</a>
-    </nav>
+    <a class="brand" href="/"><img src="/logo.svg" alt="" width="28" height="28"><span class="brand-name">Aex Rebalancer</span></a>
+    <div class="topright">
+      <nav class="toplinks" aria-label="Page" data-i18n-attr="aria-label:navLabel">
+        <a class="hide-sm" href="#portfolio" data-i18n="navLive">Live</a>
+        <a class="hide-sm" href="#how" data-i18n="navHow">How it works</a>
+        <a href="#integrate" data-i18n="navIntegrate">Integrate</a>
+        <a href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">GitHub</a>
+      </nav>
+      <div class="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:langLabel">
+        <button type="button" data-lang="en" aria-pressed="true" lang="en" aria-label="English">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false" lang="es" aria-label="Español">ES</button>
+      </div>
+    </div>
   </div>
 </header>
 
 <main id="main">
   <div class="wrap">
     <div class="hero">
-      <img class="hero-logo" src="/logo.svg" alt="Aex Rebalancer logo: two balanced weights" width="72" height="72">
+      <img class="hero-logo" src="/logo.svg" alt="" width="72" height="72" data-i18n-attr="alt:logoAlt">
       <h1>Aex Rebalancer</h1>
-      <p class="lede">An onchain agent that keeps a <strong>WBNB / USDT</strong> portfolio at its target weight. When the mix drifts, it swaps on PancakeSwap, with a slippage cap and a per-transaction limit.</p>
-      <ul class="badges" aria-label="Agent facts">
+      <p class="lede" data-i18n-html="lede"></p>
+      <ul class="badges" aria-label="Agent facts" data-i18n-attr="aria-label:badgesLabel">
         <li class="badge hl">ERC-8004 #2545</li>
         <li class="badge">BSC Testnet</li>
-        <li class="badge">Rebalancing</li>
+        <li class="badge" data-i18n="badgeRebal">Rebalancing</li>
       </ul>
       <div class="cta">
-        <a class="btn primary" href="https://app.hellofugu.xyz/agent/97%3A2545" rel="noopener">Hire on HelloFugu <span aria-hidden="true">↗</span></a>
-        <a class="btn ghost" href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">View on GitHub <span aria-hidden="true">↗</span></a>
+        <a class="btn primary" href="https://app.hellofugu.xyz/agent/97%3A2545" rel="noopener"><span data-i18n="hire">Hire on HelloFugu</span> <span aria-hidden="true">↗</span></a>
+        <a class="btn ghost" href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener"><span data-i18n="viewGh">View on GitHub</span> <span aria-hidden="true">↗</span></a>
       </div>
     </div>
 
     <section id="portfolio" aria-labelledby="h-portfolio">
       <div class="sec-head">
-        <h2 id="h-portfolio">Live portfolio</h2>
-        <span class="live" id="live" data-state="load" role="status"><span class="dot" aria-hidden="true"></span><span id="live-text">Loading…</span></span>
+        <h2 id="h-portfolio" data-i18n="hPortfolio">Live portfolio</h2>
+        <span class="live" id="live" data-state="load" role="status"><span class="dot" aria-hidden="true"></span><span id="live-text"></span></span>
       </div>
       <div class="card portfolio" id="pf" aria-busy="true">
         <div class="weight-top">
           <div>
-            <div class="label">BNB-side weight</div>
+            <div class="label" data-i18n="weightLabel">BNB-side weight</div>
             <div class="big sk" id="w-val" style="margin-top:8px">00.00<small>%</small></div>
           </div>
           <div style="text-align:right">
-            <div class="label">Target</div>
+            <div class="label" data-i18n="target">Target</div>
             <div class="big" id="t-val" style="margin-top:8px;color:var(--muted)">50<small>%</small></div>
           </div>
         </div>
@@ -288,70 +304,70 @@ footer a { color: var(--text); text-underline-offset: 3px; }
         <div class="legend">
           <span><i class="l-bnb"></i>BNB + WBNB</span>
           <span><i class="l-usd"></i>USDT</span>
-          <span><i class="l-band"></i>±<span id="thr">1</span>% no-trade zone</span>
+          <span><i class="l-band"></i>±<span id="thr">1</span>% <span data-i18n="zone">no-trade zone</span></span>
         </div>
 
         <div class="stats">
-          <div class="stat"><div class="label">BNB (native)</div><div class="v sk" id="s-bnb">0.0000</div></div>
+          <div class="stat"><div class="label" data-i18n="bnbNative">BNB (native)</div><div class="v sk" id="s-bnb">0.0000</div></div>
           <div class="stat"><div class="label">USDT</div><div class="v sk" id="s-usdt">0.0000</div></div>
-          <div class="stat"><div class="label">Price</div><div class="v sk" id="s-price">00.00</div></div>
-          <div class="stat"><div class="label">Drift</div><div class="v sk" id="s-drift">+0.00</div></div>
+          <div class="stat"><div class="label" data-i18n="price">Price</div><div class="v sk" id="s-price">00.00</div></div>
+          <div class="stat"><div class="label" data-i18n="drift">Drift</div><div class="v sk" id="s-drift">+0.00</div></div>
         </div>
 
         <div class="next" id="next" data-pending="false">
-          <div class="label">Agent's next action</div>
+          <div class="label" data-i18n="nextLabel">Agent's next action</div>
           <p class="t sk" id="next-t">Checking the pool.</p>
           <p id="next-d"></p>
         </div>
         <div class="err" id="status-err" hidden>
-          <span><b>Could not load live data.</b> <span id="status-err-msg">The status endpoint did not respond.</span></span>
-          <button class="link-btn" type="button" data-retry="status">Try again</button>
+          <span><b data-i18n="stErrTitle">Could not load live data.</b> <span id="status-err-msg"></span></span>
+          <button class="link-btn" type="button" data-retry="status" data-i18n="retry">Try again</button>
         </div>
       </div>
     </section>
 
     <section id="actions" aria-labelledby="h-actions">
       <div class="sec-head">
-        <h2 id="h-actions">Recent onchain actions</h2>
+        <h2 id="h-actions" data-i18n="hActions">Recent onchain actions</h2>
         <span class="eyebrow" id="act-count" aria-live="polite"></span>
       </div>
       <div class="card" id="act-card" aria-busy="true">
-        <div class="acts-head label" aria-hidden="true"><span>Time</span><span>Action</span><span>Amount</span><span>Tx</span></div>
+        <div class="acts-head label" aria-hidden="true"><span data-i18n="thTime">Time</span><span data-i18n="thAction">Action</span><span data-i18n="thAmount">Amount</span><span>Tx</span></div>
         <ul class="acts" id="acts">
           <li class="sk sk-row"></li><li class="sk sk-row"></li><li class="sk sk-row"></li>
         </ul>
         <div class="err" id="act-err" hidden style="margin:16px;">
-          <span><b>Could not load actions.</b> <span id="act-err-msg">Reading the chain can take a moment.</span></span>
-          <button class="link-btn" type="button" data-retry="activity">Try again</button>
+          <span><b data-i18n="acErrTitle">Could not load actions.</b> <span id="act-err-msg"></span></span>
+          <button class="link-btn" type="button" data-retry="activity" data-i18n="retry">Try again</button>
         </div>
       </div>
     </section>
 
     <section id="how" aria-labelledby="h-how">
-      <div class="sec-head"><h2 id="h-how">How it works</h2></div>
+      <div class="sec-head"><h2 id="h-how" data-i18n="hHow">How it works</h2></div>
       <ol class="steps">
-        <li><h3>Read the pool and balances</h3><p>The agent reads its wallet and the PancakeSwap V2 testnet WBNB / USDT pool to get the current price and portfolio mix. Native BNB and WBNB count as one side.</p></li>
-        <li><h3>Compute drift against the target</h3><p>It compares the BNB-side weight with the target (50/50 by default). Inside the 1% threshold it does nothing; past it, it sizes the swap that brings the mix back.</p></li>
-        <li><h3>Swap with guardrails</h3><p>It swaps on PancakeSwap with a 1% slippage cap and at most 0.02 BNB per transaction. A daily cron runs the check; nothing else triggers a trade.</p></li>
+        <li><h3 data-i18n="s1t">Read the pool and balances</h3><p data-i18n="s1p"></p></li>
+        <li><h3 data-i18n="s2t">Compute drift against the target</h3><p data-i18n="s2p"></p></li>
+        <li><h3 data-i18n="s3t">Swap with guardrails</h3><p data-i18n="s3p"></p></li>
       </ol>
-      <ul class="facts" aria-label="Parameters">
-        <li>Target <b>50 / 50</b></li><li>Drift threshold <b>1%</b></li><li>Slippage <b>1%</b></li><li>Max per tx <b>0.02 BNB</b></li><li>Schedule <b>daily</b></li>
+      <ul class="facts" aria-label="Parameters" data-i18n-attr="aria-label:factsLabel">
+        <li><span data-i18n="fTarget">Target</span> <b>50 / 50</b></li><li><span data-i18n="fDrift">Drift threshold</span> <b>1%</b></li><li><span data-i18n="fSlip">Slippage</span> <b>1%</b></li><li><span data-i18n="fMax">Max per tx</span> <b>0.02 BNB</b></li><li><span data-i18n="fSched">Schedule</span> <b data-i18n="fDaily">daily</b></li>
       </ul>
-      <p class="note"><strong>Owner-only execution.</strong> Only the agent's owner can trigger a real swap. Anyone else who calls the agent over A2A gets a dry-run plan: what it would do, without sending a transaction.</p>
+      <p class="note" data-i18n-html="note"></p>
     </section>
 
     <section id="integrate" aria-labelledby="h-int">
-      <div class="sec-head"><h2 id="h-int">Integrate and verify</h2></div>
+      <div class="sec-head"><h2 id="h-int" data-i18n="hInt">Integrate and verify</h2></div>
       <ul class="links">
-        <li><a href="/.well-known/agent-card.json"><span><span class="n">Agent card</span><span class="p">/.well-known/agent-card.json</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a href="/.well-known/agent-registration.json"><span><span class="n">Registration</span><span class="p">/.well-known/agent-registration.json</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a href="/api/status"><span><span class="n">Status JSON</span><span class="p">/api/status</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a href="https://testnet.bscscan.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e?a=2545" rel="noopener"><span><span class="n">ERC-8004 identity NFT</span><span class="p">BscScan · token #2545</span></span><span class="arrow" aria-hidden="true">↗</span></a></li>
-        <li><a href="https://testnet.bscscan.com/" id="wallet-link" rel="noopener"><span><span class="n">Agent wallet</span><span class="p" id="wallet-text">BscScan · loading address…</span></span><span class="arrow" aria-hidden="true">↗</span></a></li>
-        <li><a href="/api/a2a"><span><span class="n">A2A endpoint</span><span class="p">/api/a2a · JSON-RPC, POST</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="/.well-known/agent-card.json"><span><span class="n" data-i18n="lCard">Agent card</span><span class="p">/.well-known/agent-card.json</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="/.well-known/agent-registration.json"><span><span class="n" data-i18n="lReg">Registration</span><span class="p">/.well-known/agent-registration.json</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="/api/status"><span><span class="n" data-i18n="lStatus">Status JSON</span><span class="p">/api/status</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://testnet.bscscan.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e?a=2545" rel="noopener"><span><span class="n" data-i18n="lNft">ERC-8004 identity NFT</span><span class="p">BscScan · token #2545</span></span><span class="arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://testnet.bscscan.com/" id="wallet-link" rel="noopener"><span><span class="n" data-i18n="lWallet">Agent wallet</span><span class="p" id="wallet-text"></span></span><span class="arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="/api/a2a"><span><span class="n" data-i18n="lA2a">A2A endpoint</span><span class="p">/api/a2a · JSON-RPC, POST</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
       </ul>
-      <div class="code-head"><span class="label">Ask the agent for its status (A2A)</span><button class="copy" type="button" id="copy">Copy</button></div>
-      <pre id="curl" tabindex="0" aria-label="curl command"><span class="k">curl</span> -s https://aex-rebalancer.vercel.app/api/a2a -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"status"}],"messageId":"1"}}}'</pre>
+      <div class="code-head"><span class="label" data-i18n="codeLabel">Ask the agent for its status (A2A)</span><button class="copy" type="button" id="copy" data-i18n="copy">Copy</button></div>
+      <pre id="curl" tabindex="0" aria-label="curl command" data-i18n-attr="aria-label:curlLabel"><span class="k">curl</span> -s https://aex-rebalancer.vercel.app/api/a2a -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"status"}],"messageId":"1"}}}'</pre>
       <span class="sr" id="copy-live" role="status"></span>
     </section>
   </div>
@@ -359,7 +375,7 @@ footer a { color: var(--text); text-underline-offset: 3px; }
 
 <footer>
   <div class="wrap">
-    <span>Testnet only · no real funds</span>
+    <span data-i18n="footer">Testnet only · no real funds</span>
     <span><a href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">github.com/latmontecinos-sketch/bnb-agent</a></span>
   </div>
 </footer>
@@ -372,25 +388,128 @@ footer a { color: var(--text); text-underline-offset: 3px; }
   var REFRESH_MS = 60000;
   var lastOk = null;
 
+  /* ---------- i18n ---------- */
+  var I18N = {
+    en: {
+      locale: "en-US",
+      title: "Aex Rebalancer",
+      desc: "Aex Rebalancer is an ERC-8004 agent (#2545) on BSC testnet that keeps a WBNB / USDT portfolio at its target weight by swapping on PancakeSwap. Testnet only, no real funds.",
+      ogDesc: "An onchain agent that keeps a WBNB / USDT portfolio at its target weight on BSC testnet. Live portfolio, onchain actions and A2A endpoint.",
+      twDesc: "An onchain agent that keeps a WBNB / USDT portfolio at its target weight on BSC testnet.",
+      skip: "Skip to content", navLabel: "Page", langLabel: "Language",
+      navLive: "Live", navHow: "How it works", navIntegrate: "Integrate",
+      logoAlt: "Aex Rebalancer logo: two balanced weights",
+      lede: "An onchain agent that keeps a <strong>WBNB / USDT</strong> portfolio at its target weight. When the mix drifts, it swaps on PancakeSwap, with a slippage cap and a per-transaction limit.",
+      badgesLabel: "Agent facts", badgeRebal: "Rebalancing",
+      hire: "Hire on HelloFugu", viewGh: "View on GitHub",
+      hPortfolio: "Live portfolio", weightLabel: "BNB-side weight", target: "Target",
+      gauge: "BNB-side weight {w} percent, target {t} percent", markerTarget: "Target {t}%",
+      zone: "no-trade zone", bnbNative: "BNB (native)", price: "Price", drift: "Drift",
+      nextLabel: "Agent's next action", checking: "Checking the pool.",
+      holdT: "Hold. The portfolio is inside the no-trade zone.",
+      sellT: "Rebalance pending: sell BNB for USDT.", buyT: "Rebalance pending: buy BNB with USDT.", pendT: "Rebalance pending.",
+      liveUpd: "Live · updated {t}", offline: "Offline", offlineLast: "Offline · last {t}", loading: "Loading…",
+      stErrTitle: "Could not load live data.", stErrDefault: "The status endpoint did not respond.", lastGood: "Showing the last good reading from {t}.",
+      retry: "Try again",
+      hActions: "Recent onchain actions", thTime: "Time", thAction: "Action", thAmount: "Amount",
+      buyTag: "Buy", sellTag: "Sell", bought: "Bought BNB with USDT", sold: "Sold BNB for USDT",
+      swapOne: "{n} swap onchain", swapMany: "{n} swaps onchain",
+      empty: "No swaps yet. The agent only trades when drift passes the threshold.",
+      viewTx: "View transaction {h} on BscScan",
+      acErrTitle: "Could not load actions.", acErrDefault: "Reading the chain is taking too long.", earlier: "Showing earlier results",
+      hHow: "How it works",
+      s1t: "Read the pool and balances", s1p: "The agent reads its wallet and the PancakeSwap V2 testnet WBNB / USDT pool to get the current price and portfolio mix. Native BNB and WBNB count as one side.",
+      s2t: "Compute drift against the target", s2p: "It compares the BNB-side weight with the target (50/50 by default). Inside the 1% threshold it does nothing; past it, it sizes the swap that brings the mix back.",
+      s3t: "Swap with guardrails", s3p: "It swaps on PancakeSwap with a 1% slippage cap and at most 0.02 BNB per transaction. A daily cron runs the check; nothing else triggers a trade.",
+      factsLabel: "Parameters", fTarget: "Target", fDrift: "Drift threshold", fSlip: "Slippage", fMax: "Max per tx", fSched: "Schedule", fDaily: "daily",
+      note: "<strong>Owner-only execution.</strong> Only the agent's owner can trigger a real swap. Anyone else who calls the agent over A2A gets a dry-run plan: what it would do, without sending a transaction.",
+      hInt: "Integrate and verify", lCard: "Agent card", lReg: "Registration", lStatus: "Status JSON", lNft: "ERC-8004 identity NFT", lWallet: "Agent wallet", lA2a: "A2A endpoint",
+      walletLoading: "BscScan · loading address…",
+      codeLabel: "Ask the agent for its status (A2A)", curlLabel: "curl command",
+      copy: "Copy", copied: "Copied", pressCopy: "Press Ctrl+C", copiedLive: "Command copied", copyFail: "Copy failed, select the text manually",
+      footer: "Testnet only · no real funds"
+    },
+    es: {
+      locale: "es-BO",
+      title: "Aex Rebalancer",
+      desc: "Aex Rebalancer es un agente ERC-8004 (#2545) en BSC testnet que mantiene un portafolio WBNB / USDT en su peso objetivo mediante swaps en PancakeSwap. Solo testnet, sin fondos reales.",
+      ogDesc: "Un agente onchain que mantiene un portafolio WBNB / USDT en su peso objetivo en BSC testnet. Portafolio en vivo, acciones onchain y endpoint A2A.",
+      twDesc: "Un agente onchain que mantiene un portafolio WBNB / USDT en su peso objetivo en BSC testnet.",
+      skip: "Saltar al contenido", navLabel: "Página", langLabel: "Idioma",
+      navLive: "En vivo", navHow: "Cómo funciona", navIntegrate: "Integrar",
+      logoAlt: "Logo de Aex Rebalancer: dos pesos en equilibrio",
+      lede: "Un agente onchain que mantiene un portafolio <strong>WBNB / USDT</strong> en su peso objetivo. Cuando la mezcla se desvía, hace swaps en PancakeSwap, con un tope de slippage y un límite por transacción.",
+      badgesLabel: "Datos del agente", badgeRebal: "Rebalanceo",
+      hire: "Contrátalo en HelloFugu", viewGh: "Ver en GitHub",
+      hPortfolio: "Portafolio en vivo", weightLabel: "Peso del lado BNB", target: "Objetivo",
+      gauge: "Peso del lado BNB {w} por ciento, objetivo {t} por ciento", markerTarget: "Objetivo {t}%",
+      zone: "zona sin operaciones", bnbNative: "BNB (nativo)", price: "Precio", drift: "Desvío",
+      nextLabel: "Próxima acción del agente", checking: "Revisando el pool.",
+      holdT: "En espera. El portafolio está dentro de la zona sin operaciones.",
+      sellT: "Rebalanceo pendiente: vender BNB por USDT.", buyT: "Rebalanceo pendiente: comprar BNB con USDT.", pendT: "Rebalanceo pendiente.",
+      liveUpd: "En vivo · actualizado {t}", offline: "Sin conexión", offlineLast: "Sin conexión · último {t}", loading: "Cargando…",
+      stErrTitle: "No se pudieron cargar los datos en vivo.", stErrDefault: "El endpoint de estado no respondió.", lastGood: "Mostrando la última lectura válida de las {t}.",
+      retry: "Reintentar",
+      hActions: "Acciones onchain recientes", thTime: "Hora", thAction: "Acción", thAmount: "Monto",
+      buyTag: "Compra", sellTag: "Venta", bought: "Compró BNB con USDT", sold: "Vendió BNB por USDT",
+      swapOne: "{n} swap onchain", swapMany: "{n} swaps onchain",
+      empty: "Aún no hay swaps. El agente solo opera cuando el desvío supera el umbral.",
+      viewTx: "Ver la transacción {h} en BscScan",
+      acErrTitle: "No se pudieron cargar las acciones.", acErrDefault: "Leer la cadena está tardando demasiado.", earlier: "Mostrando resultados anteriores",
+      hHow: "Cómo funciona",
+      s1t: "Lee el pool y los saldos", s1p: "El agente lee su wallet y el pool WBNB / USDT de PancakeSwap V2 en testnet para obtener el precio actual y la composición del portafolio. BNB nativo y WBNB cuentan como un solo lado.",
+      s2t: "Calcula el desvío frente al objetivo", s2p: "Compara el peso del lado BNB con el objetivo (50/50 por defecto). Dentro del umbral de 1% no hace nada; si lo supera, calcula el swap que devuelve la mezcla al objetivo.",
+      s3t: "Swap con límites de seguridad", s3p: "Hace el swap en PancakeSwap con un tope de slippage de 1% y un máximo de 0.02 BNB por transacción. Un cron diario ejecuta la revisión; nada más dispara una operación.",
+      factsLabel: "Parámetros", fTarget: "Objetivo", fDrift: "Umbral de desvío", fSlip: "Slippage", fMax: "Máx. por tx", fSched: "Frecuencia", fDaily: "diaria",
+      note: "<strong>Ejecución solo para el dueño.</strong> Solo el dueño del agente puede disparar un swap real. Cualquier otra persona que consulte al agente por A2A recibe un plan de prueba: lo que haría, sin enviar ninguna transacción.",
+      hInt: "Integra y verifica", lCard: "Tarjeta del agente", lReg: "Registro", lStatus: "Estado (JSON)", lNft: "NFT de identidad ERC-8004", lWallet: "Wallet del agente", lA2a: "Endpoint A2A",
+      walletLoading: "BscScan · cargando dirección…",
+      codeLabel: "Pídele al agente su estado (A2A)", curlLabel: "comando curl",
+      copy: "Copiar", copied: "Copiado", pressCopy: "Presiona Ctrl+C", copiedLive: "Comando copiado", copyFail: "No se pudo copiar, selecciona el texto manualmente",
+      footer: "Solo testnet · sin fondos reales"
+    }
+  };
+  var lang = "en";
+  function t(k, vars) {
+    var s = (I18N[lang] && I18N[lang][k]); if (s === undefined) s = I18N.en[k]; if (s === undefined) return k;
+    if (vars) for (var v in vars) s = s.split("{" + v + "}").join(vars[v]);
+    return s;
+  }
+  function pickLang() {
+    try { var q = new URLSearchParams(location.search).get("lang"); if (q) { q = q.toLowerCase().slice(0, 2); if (q === "es" || q === "en") return q; } } catch (e) {}
+    try { var s = localStorage.getItem("aex-lang"); if (s === "es" || s === "en") return s; } catch (e) {}
+    var n = (navigator.language || "en").toLowerCase();
+    return n.indexOf("es") === 0 ? "es" : "en";
+  }
   function num(x) { var n = Number(x); return isFinite(n) ? n : null; }
-  function fmt(n, d) { return n === null ? "—" : n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function fmt(n, d) { return n === null ? "—" : n.toLocaleString(t("locale"), { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function tm(d) { return d.toLocaleTimeString(t("locale")); }
   function short(a) { return typeof a === "string" && a.length > 12 ? a.slice(0, 6) + "…" + a.slice(-4) : (a || "—"); }
   function setSk(el, on) { el.classList.toggle("sk", on); }
-  function setText(el, t) { el.textContent = t; setSk(el, false); }
+  function setText(el, s) { el.textContent = s; setSk(el, false); }
   function withUnit(el, v, unit) { el.textContent = v; if (unit) { var s = document.createElement("small"); s.textContent = unit; el.appendChild(s); } setSk(el, false); }
-  function fetchJson(url, ms) {
-    var ctl = new AbortController();
-    var t = setTimeout(function () { ctl.abort(); }, ms);
-    return fetch(url, { headers: { accept: "application/json" }, signal: ctl.signal }).then(function (r) {
-      return r.json().catch(function () { return {}; }).then(function (j) {
-        if (!r.ok) throw new Error((j && j.error) ? String(j.error).slice(0, 140) : "HTTP " + r.status);
-        return j;
-      });
-    }).finally(function () { clearTimeout(t); });
+
+  /* server reasons are English; translate the known patterns when in Spanish */
+  function reasonText(r) {
+    if (!r) return "";
+    r = String(r);
+    if (lang !== "es") return r;
+    var m;
+    if ((m = r.match(/^Drift (-?[\d.]+)% is within the ([\d.]+)% threshold\.$/))) return "El desvío de " + fmt(Number(m[1]), 2) + "% está dentro del umbral de " + fmt(Number(m[2]), 0) + "%.";
+    if ((m = r.match(/^Needed swap \((?:~)?([\d.]+) BNB\) is below the minimum ([\d.]+) BNB\.$/))) return "El swap necesario (" + m[1] + " BNB) es menor que el mínimo de " + m[2] + " BNB.";
+    if ((m = r.match(/^WBNB weight ([\d.]+)% > target ([\d.]+)%: sell BNB for (\S+?)\.$/))) return "El peso de WBNB (" + fmt(Number(m[1]), 2) + "%) supera el objetivo (" + fmt(Number(m[2]), 0) + "%): vender BNB por " + m[3] + ".";
+    if ((m = r.match(/^WBNB weight ([\d.]+)% < target ([\d.]+)%: buy BNB with (\S+?)\.$/))) return "El peso de WBNB (" + fmt(Number(m[1]), 2) + "%) está por debajo del objetivo (" + fmt(Number(m[2]), 0) + "%): comprar BNB con " + m[3] + ".";
+    if (r.indexOf("Portfolio is empty") === 0) return "El portafolio está vacío (sin BNB/WBNB ni stable disponibles). Primero fondea la wallet del agente.";
+    return r;
   }
 
-  /* status */
-  function renderStatus(s) {
+  /* ---------- state ---------- */
+  var st = { kind: "load", data: null, err: null };   // status
+  var ac = { kind: "load", data: null, err: null };   // activity
+
+  function renderStatus() {
+    var s = st.data;
+    if (!s) return;
     var w = num(s.wbnbWeightPct), tgt = num(s.targetPct), p = s.plan || {};
     var thr = num(p.thresholdPct); if (thr === null) thr = 1;
     if (tgt === null) tgt = 50;
@@ -400,11 +519,11 @@ footer a { color: var(--text); text-underline-offset: 3px; }
     var pct = Math.max(0, Math.min(100, w === null ? 0 : w));
     $("fill").style.width = pct + "%";
     $("marker").style.left = tgt + "%";
-    var ml = $("m-label"); ml.style.left = Math.max(12, Math.min(88, tgt)) + "%"; ml.textContent = "Target " + fmt(tgt, 0) + "%";
+    var ml = $("m-label"); ml.style.left = Math.max(12, Math.min(88, tgt)) + "%"; ml.textContent = t("markerTarget", { t: fmt(tgt, 0) });
     var lo = Math.max(0, tgt - thr), hi = Math.min(100, tgt + thr);
     $("band").style.left = lo + "%"; $("band").style.width = (hi - lo) + "%";
     $("thr").textContent = fmt(thr, 0);
-    $("gauge").setAttribute("aria-label", "BNB-side weight " + fmt(w, 2) + " percent, target " + fmt(tgt, 0) + " percent");
+    $("gauge").setAttribute("aria-label", t("gauge", { w: fmt(w, 2), t: fmt(tgt, 0) }));
 
     var h = s.holdings || {};
     withUnit($("s-bnb"), fmt(num(h.native), 4), "BNB");
@@ -416,34 +535,48 @@ footer a { color: var(--text); text-underline-offset: 3px; }
     withUnit($("s-drift"), ds, d === null ? "" : "%");
 
     var pending = p.action && p.action !== "none";
-    var next = $("next"); next.setAttribute("data-pending", pending ? "true" : "false");
-    var title, detail = p.reason ? String(p.reason) : "";
-    if (!pending) title = "Hold. The portfolio is inside the no-trade zone.";
-    else if (p.action === "sell_bnb") title = "Rebalance pending: sell BNB for USDT.";
-    else if (p.action === "buy_bnb") title = "Rebalance pending: buy BNB with USDT.";
-    else title = "Rebalance pending.";
-    setText($("next-t"), title); setText($("next-d"), detail);
-
-    $("pf").setAttribute("aria-busy", "false");
-    $("status-err").hidden = true;
+    $("next").setAttribute("data-pending", pending ? "true" : "false");
+    var title;
+    if (!pending) title = t("holdT");
+    else if (p.action === "sell_bnb") title = t("sellT");
+    else if (p.action === "buy_bnb") title = t("buyT");
+    else title = t("pendT");
+    setText($("next-t"), title); setText($("next-d"), reasonText(p.reason));
     if (s.operatingWallet) {
       $("wallet-link").href = EXPLORER + "/address/" + encodeURIComponent(s.operatingWallet);
       $("wallet-text").textContent = "BscScan · " + short(s.operatingWallet);
     }
-    lastOk = new Date(); updateLive("ok");
   }
-  function statusFailed(e) {
-    $("pf").setAttribute("aria-busy", "false");
-    ["w-val", "s-bnb", "s-usdt", "s-price", "s-drift", "next-t"].forEach(function (id) { if ($(id).classList.contains("sk")) setText($(id), "—"); });
-    $("status-err-msg").textContent = lastOk ? "Showing the last good reading from " + lastOk.toLocaleTimeString("en-US") + "." : (e && e.message ? e.message : "The status endpoint did not respond.");
-    $("status-err").hidden = false; updateLive("err");
-  }
-  function updateLive(state) {
-    var el = $("live"); el.setAttribute("data-state", state);
-    $("live-text").textContent = state === "ok" && lastOk ? "Live · updated " + lastOk.toLocaleTimeString("en-US") : state === "err" ? "Offline" + (lastOk ? " · last " + lastOk.toLocaleTimeString("en-US") : "") : "Loading…";
+  function renderStatusChrome() {
+    $("pf").setAttribute("aria-busy", st.kind === "load" ? "true" : "false");
+    var errBox = $("status-err");
+    if (st.kind === "err") {
+      ["w-val", "s-bnb", "s-usdt", "s-price", "s-drift", "next-t"].forEach(function (id) { if ($(id).classList.contains("sk")) setText($(id), "—"); });
+      $("status-err-msg").textContent = lastOk ? t("lastGood", { t: tm(lastOk) }) : (st.err || t("stErrDefault"));
+      errBox.hidden = false;
+    } else errBox.hidden = true;
+    if (!st.data && st.kind === "load") $("next-t").textContent = t("checking");
+    var el = $("live"), state = st.kind === "ok" ? "ok" : st.kind === "err" ? "err" : "load";
+    el.setAttribute("data-state", state);
+    $("live-text").textContent = state === "ok" && lastOk ? t("liveUpd", { t: tm(lastOk) }) : state === "err" ? (lastOk ? t("offlineLast", { t: tm(lastOk) }) : t("offline")) : t("loading");
+    if (!$("wallet-text").textContent || (!st.data || !st.data.operatingWallet)) $("wallet-text").textContent = t("walletLoading");
   }
   function loadStatus() {
-    return fetchJson("/api/status", 25000).then(renderStatus).catch(statusFailed);
+    return fetchJson("/api/status", 25000).then(function (s) {
+      st = { kind: "ok", data: s, err: null }; lastOk = new Date(); renderStatus(); renderStatusChrome();
+    }).catch(function (e) {
+      st = { kind: "err", data: st.data, err: e && e.name !== "AbortError" && e.message ? e.message : null }; renderStatusChrome();
+    });
+  }
+  function fetchJson(url, ms) {
+    var ctl = new AbortController();
+    var timer = setTimeout(function () { ctl.abort(); }, ms);
+    return fetch(url, { headers: { accept: "application/json" }, signal: ctl.signal }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) throw new Error((j && j.error) ? String(j.error).slice(0, 140) : "HTTP " + r.status);
+        return j;
+      });
+    }).finally(function () { clearTimeout(timer); });
   }
 
   /* activity */
@@ -452,49 +585,77 @@ footer a { color: var(--text); text-underline-offset: 3px; }
     return EXPLORER + "/tx/" + encodeURIComponent(a.hash || "");
   }
   function li(cls) { var e = document.createElement("li"); e.className = cls; return e; }
-  function div(cls, t) { var e = document.createElement("div"); if (cls) e.className = cls; if (t !== undefined) e.textContent = t; return e; }
-  function renderActivity(r) {
-    var ul = $("acts"); ul.textContent = "";
-    var list = Array.isArray(r.actions) ? r.actions : [];
-    var total = num(r.count); if (total === null) total = list.length;
-    $("act-count").textContent = total + (total === 1 ? " swap" : " swaps") + " onchain";
-    if (!list.length) { var e = li("empty"); e.textContent = "No swaps yet. The agent only trades when drift passes the threshold."; ul.appendChild(e); }
-    list.forEach(function (a) {
-      var item = li("act"), bought = a.side === "bought_bnb";
-      var dt = new Date(a.time), ok = !isNaN(dt.getTime());
-      var what = div("what"); var tag = document.createElement("span"); tag.className = "tag " + (bought ? "buy" : "sell"); tag.textContent = bought ? "Buy" : "Sell";
-      what.appendChild(tag); what.appendChild(document.createTextNode(bought ? "Bought BNB with USDT" : "Sold BNB for USDT"));
-      var when = document.createElement("time"); when.className = "when";
-      if (ok) { when.dateTime = dt.toISOString(); when.textContent = dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + ", " + dt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); } else when.textContent = "—";
-      var amt = div("amt", fmt(num(a.stableAmount), 4) + " " + (a.stableSymbol || "USDT"));
-      var tx = document.createElement("a"); tx.className = "tx"; tx.href = safeTx(a); tx.rel = "noopener"; tx.textContent = short(a.hash) + " ↗";
-      tx.setAttribute("aria-label", "View transaction " + short(a.hash) + " on BscScan");
-      item.appendChild(when); item.appendChild(what); item.appendChild(amt); item.appendChild(tx);
-      ul.appendChild(item);
-    });
-    $("act-card").setAttribute("aria-busy", "false"); $("act-err").hidden = true;
-  }
-  function activityFailed(e) {
-    var ul = $("acts"); if (ul.querySelector(".sk")) ul.textContent = "";
-    $("act-err-msg").textContent = e && e.message && e.name !== "AbortError" ? e.message : "Reading the chain is taking too long.";
-    $("act-err").hidden = false; $("act-card").setAttribute("aria-busy", "false");
-    $("act-count").textContent = ul.children.length ? "Showing earlier results" : "";
+  function div(cls, s) { var e = document.createElement("div"); if (cls) e.className = cls; if (s !== undefined) e.textContent = s; return e; }
+  function renderActivity() {
+    var ul = $("acts"), r = ac.data;
+    if (ac.kind === "load" && !r) { if (!ul.children.length) for (var i = 0; i < 3; i++) ul.appendChild(li("sk sk-row")); }
+    if (r) {
+      ul.textContent = "";
+      var list = Array.isArray(r.actions) ? r.actions : [];
+      var total = num(r.count); if (total === null) total = list.length;
+      $("act-count").textContent = t(total === 1 ? "swapOne" : "swapMany", { n: total });
+      if (!list.length) { var e = li("empty"); e.textContent = t("empty"); ul.appendChild(e); }
+      list.forEach(function (a) {
+        var item = li("act"), bought = a.side === "bought_bnb";
+        var dt = new Date(a.time), ok = !isNaN(dt.getTime());
+        var what = div("what"); var tag = document.createElement("span"); tag.className = "tag " + (bought ? "buy" : "sell"); tag.textContent = bought ? t("buyTag") : t("sellTag");
+        what.appendChild(tag); what.appendChild(document.createTextNode(bought ? t("bought") : t("sold")));
+        var when = document.createElement("time"); when.className = "when";
+        if (ok) { when.dateTime = dt.toISOString(); when.textContent = dt.toLocaleDateString(t("locale"), { month: "short", day: "numeric", year: "numeric" }) + ", " + dt.toLocaleTimeString(t("locale"), { hour: "2-digit", minute: "2-digit" }); } else when.textContent = "—";
+        var amt = div("amt", fmt(num(a.stableAmount), 4) + " " + (a.stableSymbol || "USDT"));
+        var tx = document.createElement("a"); tx.className = "tx"; tx.href = safeTx(a); tx.rel = "noopener"; tx.textContent = short(a.hash) + " ↗";
+        tx.setAttribute("aria-label", t("viewTx", { h: short(a.hash) }));
+        item.appendChild(when); item.appendChild(what); item.appendChild(amt); item.appendChild(tx);
+        ul.appendChild(item);
+      });
+    }
+    if (ac.kind === "err") {
+      if (!r) { if (ul.querySelector(".sk")) ul.textContent = ""; $("act-count").textContent = ""; }
+      else $("act-count").textContent = t("earlier");
+      $("act-err-msg").textContent = ac.err || t("acErrDefault");
+      $("act-err").hidden = false;
+    } else $("act-err").hidden = true;
+    $("act-card").setAttribute("aria-busy", ac.kind === "load" ? "true" : "false");
   }
   function loadActivity() {
-    if (!$("acts").children.length) { var ul = $("acts"); for (var i = 0; i < 3; i++) ul.appendChild(li("sk sk-row")); }
-    return fetchJson("/api/activity", 40000).then(renderActivity).catch(activityFailed);
+    ac = { kind: "load", data: ac.data, err: null }; renderActivity();
+    return fetchJson("/api/activity", 40000).then(function (r) { ac = { kind: "ok", data: r, err: null }; renderActivity(); })
+      .catch(function (e) { ac = { kind: "err", data: ac.data, err: e && e.name !== "AbortError" && e.message ? e.message : null }; renderActivity(); });
   }
 
+  /* ---------- apply language ---------- */
+  function setMeta(sel, v) { var m = document.querySelector(sel); if (m) m.setAttribute("content", v); }
+  function applyLang(l, save) {
+    lang = l;
+    document.documentElement.lang = l;
+    document.title = t("title");
+    setMeta('meta[name="description"]', t("desc"));
+    setMeta('meta[property="og:description"]', t("ogDesc"));
+    setMeta('meta[name="twitter:description"]', t("twDesc"));
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n]"), function (el) { el.textContent = t(el.getAttribute("data-i18n")); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-html]"), function (el) { el.innerHTML = t(el.getAttribute("data-i18n-html")); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-attr]"), function (el) {
+      el.getAttribute("data-i18n-attr").split(";").forEach(function (pair) { var p = pair.split(":"); el.setAttribute(p[0], t(p[1])); });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".lang button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lang") === l ? "true" : "false"); });
+    if (save) { try { localStorage.setItem("aex-lang", l); } catch (e) {} }
+    $("wallet-text").textContent = ""; // re-set below
+    renderStatus(); renderStatusChrome(); renderActivity();
+    if (!$("gauge").getAttribute("aria-label") || st.kind === "load") $("gauge").setAttribute("aria-label", t("gauge", { w: "—", t: "50" }));
+  }
+
+  /* ---------- events ---------- */
   document.addEventListener("click", function (ev) {
+    var lb = ev.target.closest && ev.target.closest(".lang button");
+    if (lb) { applyLang(lb.getAttribute("data-lang"), true); return; }
     var b = ev.target.closest && ev.target.closest("[data-retry]"); if (!b) return;
-    if (b.getAttribute("data-retry") === "status") { updateLive("load"); loadStatus(); }
-    else { $("act-err").hidden = true; loadActivity(); }
+    if (b.getAttribute("data-retry") === "status") { st = { kind: "load", data: st.data, err: null }; renderStatusChrome(); loadStatus(); }
+    else loadActivity();
   });
 
-  /* copy */
   $("copy").addEventListener("click", function () {
     var text = $("curl").textContent, btn = this;
-    function done(ok) { btn.textContent = ok ? "Copied" : "Press Ctrl+C"; $("copy-live").textContent = ok ? "Command copied" : "Copy failed, select the text manually"; setTimeout(function () { btn.textContent = "Copy"; }, 1800); }
+    function done(ok) { btn.textContent = ok ? t("copied") : t("pressCopy"); $("copy-live").textContent = ok ? t("copiedLive") : t("copyFail"); setTimeout(function () { btn.textContent = t("copy"); }, 1800); }
     function fallback() {
       var r = document.createRange(); r.selectNodeContents($("curl")); var s = getSelection(); s.removeAllRanges(); s.addRange(r);
       var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} done(ok);
@@ -502,6 +663,7 @@ footer a { color: var(--text); text-underline-offset: 3px; }
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); else fallback();
   });
 
+  applyLang(pickLang(), false);
   loadStatus(); loadActivity();
   setInterval(function () { if (!document.hidden) loadStatus(); }, REFRESH_MS);
   document.addEventListener("visibilitychange", function () { if (!document.hidden && lastOk && Date.now() - lastOk > REFRESH_MS) loadStatus(); });
