@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { handleRpc } from "./a2a.js";
+import { recentActions } from "./activity.js";
 import { handleMessage } from "./agent.js";
 import { agentAddress } from "./chain.js";
 import { agentCard, registrationFile } from "./cards.js";
@@ -41,6 +42,15 @@ export async function status() {
     summary: r.text,
     ...r.data,
   });
+}
+
+export async function activity() {
+  try {
+    const actions = await recentActions();
+    return json({ wallet: agentAddress() ?? null, count: actions.length, actions }, 200, { "cache-control": "public, s-maxage=300, stale-while-revalidate=600" });
+  } catch (e) {
+    return json({ error: (e instanceof Error ? e.message : String(e)).split("\n")[0] }, 502);
+  }
 }
 
 export async function a2a(req: Request) {

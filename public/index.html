@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aex Rebalancer</title>
+<meta name="description" content="Aex Rebalancer is an ERC-8004 agent (#2545) on BSC testnet that keeps a WBNB / USDT portfolio at its target weight by swapping on PancakeSwap. Testnet only, no real funds.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0e11" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f3ef" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aex Rebalancer · ERC-8004 agent #2545">
+<meta property="og:description" content="An onchain agent that keeps a WBNB / USDT portfolio at its target weight on BSC testnet. Live portfolio, onchain actions and A2A endpoint.">
+<meta property="og:url" content="https://aex-rebalancer.vercel.app/">
+<meta property="og:image" content="https://aex-rebalancer.vercel.app/logo.svg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Aex Rebalancer · ERC-8004 agent #2545">
+<meta name="twitter:description" content="An onchain agent that keeps a WBNB / USDT portfolio at its target weight on BSC testnet.">
+<meta name="twitter:image" content="https://aex-rebalancer.vercel.app/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,700;112,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Tokens: dark by default, light via prefers-color-scheme.
+   Base layout and type follow industrial-minimalista v1; accent swapped to BNB yellow. */
+:root {
+  --bg: #0b0e11;
+  --surface: #14181d;
+  --surface-2: #1c2127;
+  --border: #2a3038;
+  --text: #eaecef;
+  --muted: #9aa3ae;
+  --accent: #f0b90b;        /* fills */
+  --accent-ink: #0b0e11;    /* text on accent fill */
+  --accent-text: #f0b90b;   /* accent used as text/lines */
+  --accent-soft: #241e0a;
+  --ok: #3ccf8e;
+  --bad: #f6685e;
+  --code-bg: #07090b;
+  --code-text: #e7e9ec;
+  --track: #2a3038;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f3ef;
+    --surface: #ffffff;
+    --surface-2: #ebeae5;
+    --border: #d4d2ca;
+    --text: #14171a;
+    --muted: #565c63;
+    --accent: #f0b90b;
+    --accent-ink: #14171a;
+    --accent-text: #7a5800;
+    --accent-soft: #fbf0cc;
+    --ok: #1a7a4a;
+    --bad: #b42318;
+    --code-bg: #14171a;
+    --code-text: #e7e9ec;
+    --track: #d9d7cf;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+img, svg { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; border-radius: 2px; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+.skip { position: absolute; left: 8px; top: -60px; background: var(--accent); color: var(--accent-ink); padding: 8px 12px; z-index: 50; font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; }
+.skip:focus { top: 8px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 640px) { .wrap { padding: 0 32px; } }
+
+/* header */
+.top { border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; gap: 12px; }
+.brand { white-space: nowrap; display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-stretch: 112%; font-weight: 800; font-size: 14px; letter-spacing: .02em; text-transform: uppercase; }
+.brand img { width: 28px; height: 28px; border-radius: 7px; }
+.toplinks { display: flex; gap: 20px; font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; }
+.toplinks a { text-decoration: none; color: var(--muted); padding: 8px 0; }
+.toplinks a:hover { color: var(--text); }
+@media (max-width: 479px) { .toplinks a.hide-sm { display: none; } }
+@media (max-width: 419px) { .toplinks a:not(:last-child) { display: none; } }
+
+/* hero */
+.hero { padding: 48px 0 40px; }
+@media (min-width: 640px) { .hero { padding: 80px 0 56px; } }
+.hero-logo { width: 72px; height: 72px; border-radius: 18px; margin-bottom: 24px; }
+h1 { font-family: var(--font-display); font-stretch: 112%; font-weight: 800; font-size: clamp(2.5rem, 9vw, 4.5rem); line-height: .98; letter-spacing: -.01em; margin: 0 0 16px; text-transform: uppercase; }
+.lede { font-size: 1.125rem; color: var(--muted); max-width: 40rem; margin: 0 0 24px; }
+.lede strong { color: var(--text); font-weight: 600; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; padding: 0; list-style: none; }
+.badge { font: 500 12px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .05em; padding: 8px 10px; border: 1px solid var(--border); border-radius: 2px; background: var(--surface); color: var(--text); }
+.badge.hl { border-color: var(--accent-text); color: var(--accent-text); background: var(--accent-soft); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; font: 500 13px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; text-decoration: none; border-radius: 2px; border: 1px solid transparent; cursor: pointer; transition: background-color .15s, border-color .15s, color .15s, opacity .15s; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { opacity: .9; }
+.btn.ghost { border-color: color-mix(in srgb, var(--text) 30%, transparent); color: var(--text); background: transparent; }
+.btn.ghost:hover { border-color: var(--text); }
+@media (max-width: 479px) { .cta .btn { width: 100%; } }
+
+/* sections */
+section { padding: 40px 0; border-top: 1px solid var(--border); }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+h2 { font-family: var(--font-display); font-stretch: 108%; font-weight: 700; font-size: 1.375rem; letter-spacing: -.01em; text-transform: uppercase; margin: 0; }
+.eyebrow { font: 400 11px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+h3 { font-size: 1.0625rem; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
+p { margin: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+.label { font: 400 11px/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.mono { font-family: var(--font-mono); }
+
+/* live pill */
+.live { display: inline-flex; align-items: center; gap: 8px; font: 400 11px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.live[data-state="ok"] .dot { background: var(--ok); animation: pulse 2.4s ease-in-out infinite; }
+.live[data-state="err"] .dot { background: var(--bad); }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+
+/* portfolio */
+.portfolio { padding: 20px; }
+@media (min-width: 640px) { .portfolio { padding: 28px; } }
+.weight-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.big { font-family: var(--font-display); font-stretch: 112%; font-weight: 700; font-size: clamp(2.25rem, 8vw, 3.25rem); line-height: 1; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.big small { font-size: .5em; color: var(--muted); font-weight: 600; margin-left: 2px; }
+.gauge { position: relative; padding-top: 28px; margin-bottom: 8px; }
+.track { position: relative; height: 20px; background: var(--track); border-radius: 2px; overflow: hidden; }
+.fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); width: 0; transition: width .6s cubic-bezier(.2,.7,.2,1); }
+.band { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 38%, transparent) 0 2px, transparent 2px 6px); }
+.marker { position: absolute; top: 24px; bottom: -8px; width: 2px; background: var(--text); transform: translateX(-1px); }
+.marker-label { position: absolute; top: 0; transform: translateX(-50%); font: 500 11px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; color: var(--text); }
+.scale { display: flex; justify-content: space-between; margin-top: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; margin-right: 6px; border-radius: 2px; }
+.legend .l-bnb { background: var(--accent); }
+.legend .l-usd { background: var(--track); border: 1px solid var(--border); }
+.legend .l-band { background: repeating-linear-gradient(135deg, var(--text) 0 2px, transparent 2px 4px); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-top: 24px; }
+@media (min-width: 720px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+.stat { background: var(--surface); padding: 14px 16px; min-width: 0; }
+.stat .v { font-family: var(--font-display); font-stretch: 108%; font-weight: 700; font-size: 1.375rem; margin-top: 6px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stat .v small { display: inline-block; font: 400 12px var(--font-mono); color: var(--muted); margin-left: 4px; letter-spacing: .03em; }
+.next { margin-top: 24px; padding: 16px; border-radius: 3px; background: var(--surface-2); border-left: 3px solid var(--muted); }
+.next[data-pending="true"] { border-left-color: var(--accent); background: var(--accent-soft); }
+.next .t { font-weight: 600; margin: 4px 0 2px; }
+.next p { color: var(--muted); font-size: .9375rem; }
+
+/* skeleton */
+.sk { color: transparent !important; background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; border-radius: 2px; user-select: none; }
+.sk * { visibility: hidden; }
+@keyframes shimmer { to { background-position: -200% 0 } }
+.err { margin-top: 16px; padding: 12px 16px; border: 1px solid var(--bad); border-radius: 3px; color: var(--text); font-size: .9375rem; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.err[hidden] { display: none; }
+.err b { color: var(--bad); font-weight: 600; }
+.link-btn { background: none; border: 0; padding: 8px 0; font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--accent-text); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+/* activity */
+.acts { list-style: none; margin: 0; padding: 0; }
+.act { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding: 14px 16px; border-top: 1px solid var(--border); align-items: baseline; }
+.act:first-child { border-top: 0; }
+.act .what { font-weight: 500; }
+.act .when { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.act .amt { font: 500 14px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.act .tx { font: 400 13px var(--font-mono); text-align: right; color: var(--accent-text); text-underline-offset: 3px; padding: 6px 0; }
+.act .tx:hover { text-decoration-thickness: 2px; }
+.tag { display: inline-block; font: 500 10px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .05em; padding: 4px 6px; border-radius: 2px; margin-right: 8px; vertical-align: 1px; border: 1px solid currentColor; }
+.tag.buy { color: var(--ok); }
+.tag.sell { color: var(--accent-text); }
+@media (min-width: 720px) {
+  .act { grid-template-columns: 11rem 1fr 9rem 9rem; gap: 16px; align-items: center; padding: 12px 20px; }
+  .act .amt, .act .tx { text-align: right; }
+  .act .when { font-size: 14px; }
+  .acts-head { display: grid; grid-template-columns: 11rem 1fr 9rem 9rem; gap: 16px; padding: 10px 20px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .acts-head span:nth-child(n+3) { text-align: right; }
+}
+@media (max-width: 719px) { .acts-head { display: none; } .act .amt { grid-column: 2; grid-row: 1; } .act .tx { grid-column: 2; grid-row: 2; } .act .what { grid-column: 1; grid-row: 1; } .act .when { grid-column: 1; grid-row: 2; } }
+.acts-meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid var(--border); }
+.empty { padding: 28px 16px; color: var(--muted); text-align: center; }
+.sk-row { height: 58px; margin: 12px 16px; }
+
+/* steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; counter-reset: s; }
+@media (min-width: 820px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+.steps li { background: var(--surface); padding: 20px; counter-increment: s; }
+.steps li::before { content: "0" counter(s); display: block; font: 500 12px var(--font-mono); color: var(--accent-text); letter-spacing: .05em; margin-bottom: 12px; }
+.steps p { color: var(--muted); font-size: .9375rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding: 0; list-style: none; }
+.facts li { font: 400 12px var(--font-mono); padding: 6px 10px; border: 1px solid var(--border); border-radius: 2px; color: var(--muted); }
+.facts b { color: var(--text); font-weight: 500; }
+.note { margin-top: 16px; color: var(--muted); font-size: .9375rem; max-width: 46rem; }
+.note strong { color: var(--text); font-weight: 600; }
+
+/* integrate */
+.links { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+@media (min-width: 820px) { .links { grid-template-columns: 1fr 1fr; } }
+.links a { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--surface); padding: 14px 16px; text-decoration: none; min-height: 56px; transition: background-color .15s; }
+.links a:hover { background: var(--surface-2); }
+.links a:hover .arrow { color: var(--accent-text); }
+.links .n { display: block; font-weight: 500; }
+.links .p { display: block; font: 400 12px var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
+.arrow { font-family: var(--font-mono); color: var(--muted); flex: none; }
+.code-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 16px; background: #1c2127; border-radius: 3px 3px 0 0; border: 1px solid var(--border); border-bottom: 0; }
+.code-head .label { color: #9aa3ae; }
+.copy { background: transparent; border: 1px solid #3a424c; color: #e7e9ec; min-height: 36px; padding: 0 12px; font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; border-radius: 2px; cursor: pointer; }
+.copy:hover { border-color: #e7e9ec; }
+.copy:focus-visible { outline-color: #f0b90b; }
+pre { margin: 0; padding: 16px; background: var(--code-bg); color: var(--code-text); font: 400 13px/1.65 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 0 0 3px 3px; border: 1px solid var(--border); }
+pre .k { color: #f0b90b; }
+
+/* footer */
+footer { border-top: 1px solid var(--border); padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
+footer a { color: var(--text); text-underline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/logo.svg" alt="" width="28" height="28"><span>Aex Rebalancer</span></a>
+    <nav class="toplinks" aria-label="Page">
+      <a class="hide-sm" href="#portfolio">Live</a>
+      <a class="hide-sm" href="#how">How it works</a>
+      <a href="#integrate">Integrate</a>
+      <a href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="hero">
+      <img class="hero-logo" src="/logo.svg" alt="Aex Rebalancer logo: two balanced weights" width="72" height="72">
+      <h1>Aex Rebalancer</h1>
+      <p class="lede">An onchain agent that keeps a <strong>WBNB / USDT</strong> portfolio at its target weight. When the mix drifts, it swaps on PancakeSwap, with a slippage cap and a per-transaction limit.</p>
+      <ul class="badges" aria-label="Agent facts">
+        <li class="badge hl">ERC-8004 #2545</li>
+        <li class="badge">BSC Testnet</li>
+        <li class="badge">Rebalancing</li>
+      </ul>
+      <div class="cta">
+        <a class="btn primary" href="https://app.hellofugu.xyz/agent/97%3A2545" rel="noopener">Hire on HelloFugu <span aria-hidden="true">↗</span></a>
+        <a class="btn ghost" href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">View on GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+
+    <section id="portfolio" aria-labelledby="h-portfolio">
+      <div class="sec-head">
+        <h2 id="h-portfolio">Live portfolio</h2>
+        <span class="live" id="live" data-state="load" role="status"><span class="dot" aria-hidden="true"></span><span id="live-text">Loading…</span></span>
+      </div>
+      <div class="card portfolio" id="pf" aria-busy="true">
+        <div class="weight-top">
+          <div>
+            <div class="label">BNB-side weight</div>
+            <div class="big sk" id="w-val" style="margin-top:8px">00.00<small>%</small></div>
+          </div>
+          <div style="text-align:right">
+            <div class="label">Target</div>
+            <div class="big" id="t-val" style="margin-top:8px;color:var(--muted)">50<small>%</small></div>
+          </div>
+        </div>
+
+        <div class="gauge" role="img" aria-label="Weight gauge" id="gauge">
+          <div class="marker-label" id="m-label" style="left:50%">Target 50%</div>
+          <div class="track">
+            <div class="fill" id="fill"></div>
+            <div class="band" id="band" style="left:49%;width:2%"></div>
+          </div>
+          <div class="marker" id="marker" style="left:50%"></div>
+        </div>
+        <div class="scale label" aria-hidden="true"><span>0% BNB</span><span>100% BNB</span></div>
+        <div class="legend">
+          <span><i class="l-bnb"></i>BNB + WBNB</span>
+          <span><i class="l-usd"></i>USDT</span>
+          <span><i class="l-band"></i>±<span id="thr">1</span>% no-trade zone</span>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="label">BNB (native)</div><div class="v sk" id="s-bnb">0.0000</div></div>
+          <div class="stat"><div class="label">USDT</div><div class="v sk" id="s-usdt">0.0000</div></div>
+          <div class="stat"><div class="label">Price</div><div class="v sk" id="s-price">00.00</div></div>
+          <div class="stat"><div class="label">Drift</div><div class="v sk" id="s-drift">+0.00</div></div>
+        </div>
+
+        <div class="next" id="next" data-pending="false">
+          <div class="label">Agent's next action</div>
+          <p class="t sk" id="next-t">Checking the pool.</p>
+          <p id="next-d"></p>
+        </div>
+        <div class="err" id="status-err" hidden>
+          <span><b>Could not load live data.</b> <span id="status-err-msg">The status endpoint did not respond.</span></span>
+          <button class="link-btn" type="button" data-retry="status">Try again</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="actions" aria-labelledby="h-actions">
+      <div class="sec-head">
+        <h2 id="h-actions">Recent onchain actions</h2>
+        <span class="eyebrow" id="act-count" aria-live="polite"></span>
+      </div>
+      <div class="card" id="act-card" aria-busy="true">
+        <div class="acts-head label" aria-hidden="true"><span>Time</span><span>Action</span><span>Amount</span><span>Tx</span></div>
+        <ul class="acts" id="acts">
+          <li class="sk sk-row"></li><li class="sk sk-row"></li><li class="sk sk-row"></li>
+        </ul>
+        <div class="err" id="act-err" hidden style="margin:16px;">
+          <span><b>Could not load actions.</b> <span id="act-err-msg">Reading the chain can take a moment.</span></span>
+          <button class="link-btn" type="button" data-retry="activity">Try again</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" aria-labelledby="h-how">
+      <div class="sec-head"><h2 id="h-how">How it works</h2></div>
+      <ol class="steps">
+        <li><h3>Read the pool and balances</h3><p>The agent reads its wallet and the PancakeSwap V2 testnet WBNB / USDT pool to get the current price and portfolio mix. Native BNB and WBNB count as one side.</p></li>
+        <li><h3>Compute drift against the target</h3><p>It compares the BNB-side weight with the target (50/50 by default). Inside the 1% threshold it does nothing; past it, it sizes the swap that brings the mix back.</p></li>
+        <li><h3>Swap with guardrails</h3><p>It swaps on PancakeSwap with a 1% slippage cap and at most 0.02 BNB per transaction. A daily cron runs the check; nothing else triggers a trade.</p></li>
+      </ol>
+      <ul class="facts" aria-label="Parameters">
+        <li>Target <b>50 / 50</b></li><li>Drift threshold <b>1%</b></li><li>Slippage <b>1%</b></li><li>Max per tx <b>0.02 BNB</b></li><li>Schedule <b>daily</b></li>
+      </ul>
+      <p class="note"><strong>Owner-only execution.</strong> Only the agent's owner can trigger a real swap. Anyone else who calls the agent over A2A gets a dry-run plan: what it would do, without sending a transaction.</p>
+    </section>
+
+    <section id="integrate" aria-labelledby="h-int">
+      <div class="sec-head"><h2 id="h-int">Integrate and verify</h2></div>
+      <ul class="links">
+        <li><a href="/.well-known/agent-card.json"><span><span class="n">Agent card</span><span class="p">/.well-known/agent-card.json</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="/.well-known/agent-registration.json"><span><span class="n">Registration</span><span class="p">/.well-known/agent-registration.json</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="/api/status"><span><span class="n">Status JSON</span><span class="p">/api/status</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://testnet.bscscan.com/token/0x8004A818BFB912233c491871b3d84c89A494BD9e?a=2545" rel="noopener"><span><span class="n">ERC-8004 identity NFT</span><span class="p">BscScan · token #2545</span></span><span class="arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://testnet.bscscan.com/" id="wallet-link" rel="noopener"><span><span class="n">Agent wallet</span><span class="p" id="wallet-text">BscScan · loading address…</span></span><span class="arrow" aria-hidden="true">↗</span></a></li>
+        <li><a href="/api/a2a"><span><span class="n">A2A endpoint</span><span class="p">/api/a2a · JSON-RPC, POST</span></span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+      <div class="code-head"><span class="label">Ask the agent for its status (A2A)</span><button class="copy" type="button" id="copy">Copy</button></div>
+      <pre id="curl" tabindex="0" aria-label="curl command"><span class="k">curl</span> -s https://aex-rebalancer.vercel.app/api/a2a -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"status"}],"messageId":"1"}}}'</pre>
+      <span class="sr" id="copy-live" role="status"></span>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Testnet only · no real funds</span>
+    <span><a href="https://github.com/latmontecinos-sketch/bnb-agent" rel="noopener">github.com/latmontecinos-sketch/bnb-agent</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var EXPLORER = "https://testnet.bscscan.com";
+  var REFRESH_MS = 60000;
+  var lastOk = null;
+
+  function num(x) { var n = Number(x); return isFinite(n) ? n : null; }
+  function fmt(n, d) { return n === null ? "—" : n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function short(a) { return typeof a === "string" && a.length > 12 ? a.slice(0, 6) + "…" + a.slice(-4) : (a || "—"); }
+  function setSk(el, on) { el.classList.toggle("sk", on); }
+  function setText(el, t) { el.textContent = t; setSk(el, false); }
+  function withUnit(el, v, unit) { el.textContent = v; if (unit) { var s = document.createElement("small"); s.textContent = unit; el.appendChild(s); } setSk(el, false); }
+  function fetchJson(url, ms) {
+    var ctl = new AbortController();
+    var t = setTimeout(function () { ctl.abort(); }, ms);
+    return fetch(url, { headers: { accept: "application/json" }, signal: ctl.signal }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) throw new Error((j && j.error) ? String(j.error).slice(0, 140) : "HTTP " + r.status);
+        return j;
+      });
+    }).finally(function () { clearTimeout(t); });
+  }
+
+  /* status */
+  function renderStatus(s) {
+    var w = num(s.wbnbWeightPct), tgt = num(s.targetPct), p = s.plan || {};
+    var thr = num(p.thresholdPct); if (thr === null) thr = 1;
+    if (tgt === null) tgt = 50;
+    withUnit($("w-val"), fmt(w, 2), "%");
+    withUnit($("t-val"), fmt(tgt, 0), "%");
+    $("t-val").style.color = "var(--muted)";
+    var pct = Math.max(0, Math.min(100, w === null ? 0 : w));
+    $("fill").style.width = pct + "%";
+    $("marker").style.left = tgt + "%";
+    var ml = $("m-label"); ml.style.left = Math.max(12, Math.min(88, tgt)) + "%"; ml.textContent = "Target " + fmt(tgt, 0) + "%";
+    var lo = Math.max(0, tgt - thr), hi = Math.min(100, tgt + thr);
+    $("band").style.left = lo + "%"; $("band").style.width = (hi - lo) + "%";
+    $("thr").textContent = fmt(thr, 0);
+    $("gauge").setAttribute("aria-label", "BNB-side weight " + fmt(w, 2) + " percent, target " + fmt(tgt, 0) + " percent");
+
+    var h = s.holdings || {};
+    withUnit($("s-bnb"), fmt(num(h.native), 4), "BNB");
+    withUnit($("s-usdt"), fmt(num(h.stable), 4), (s.market && s.market.stable) || "USDT");
+    var price = s.market ? num(s.market.priceStablePerBnb) : null;
+    withUnit($("s-price"), fmt(price, 2), ((s.market && s.market.stable) || "USDT") + "/BNB");
+    var d = num(p.driftPct);
+    var ds = d === null ? "—" : (d > 0 ? "+" : d < 0 ? "−" : "") + fmt(Math.abs(d), 2);
+    withUnit($("s-drift"), ds, d === null ? "" : "%");
+
+    var pending = p.action && p.action !== "none";
+    var next = $("next"); next.setAttribute("data-pending", pending ? "true" : "false");
+    var title, detail = p.reason ? String(p.reason) : "";
+    if (!pending) title = "Hold. The portfolio is inside the no-trade zone.";
+    else if (p.action === "sell_bnb") title = "Rebalance pending: sell BNB for USDT.";
+    else if (p.action === "buy_bnb") title = "Rebalance pending: buy BNB with USDT.";
+    else title = "Rebalance pending.";
+    setText($("next-t"), title); setText($("next-d"), detail);
+
+    $("pf").setAttribute("aria-busy", "false");
+    $("status-err").hidden = true;
+    if (s.operatingWallet) {
+      $("wallet-link").href = EXPLORER + "/address/" + encodeURIComponent(s.operatingWallet);
+      $("wallet-text").textContent = "BscScan · " + short(s.operatingWallet);
+    }
+    lastOk = new Date(); updateLive("ok");
+  }
+  function statusFailed(e) {
+    $("pf").setAttribute("aria-busy", "false");
+    ["w-val", "s-bnb", "s-usdt", "s-price", "s-drift", "next-t"].forEach(function (id) { if ($(id).classList.contains("sk")) setText($(id), "—"); });
+    $("status-err-msg").textContent = lastOk ? "Showing the last good reading from " + lastOk.toLocaleTimeString("en-US") + "." : (e && e.message ? e.message : "The status endpoint did not respond.");
+    $("status-err").hidden = false; updateLive("err");
+  }
+  function updateLive(state) {
+    var el = $("live"); el.setAttribute("data-state", state);
+    $("live-text").textContent = state === "ok" && lastOk ? "Live · updated " + lastOk.toLocaleTimeString("en-US") : state === "err" ? "Offline" + (lastOk ? " · last " + lastOk.toLocaleTimeString("en-US") : "") : "Loading…";
+  }
+  function loadStatus() {
+    return fetchJson("/api/status", 25000).then(renderStatus).catch(statusFailed);
+  }
+
+  /* activity */
+  function safeTx(a) {
+    if (typeof a.explorer === "string" && a.explorer.indexOf(EXPLORER + "/") === 0) return a.explorer;
+    return EXPLORER + "/tx/" + encodeURIComponent(a.hash || "");
+  }
+  function li(cls) { var e = document.createElement("li"); e.className = cls; return e; }
+  function div(cls, t) { var e = document.createElement("div"); if (cls) e.className = cls; if (t !== undefined) e.textContent = t; return e; }
+  function renderActivity(r) {
+    var ul = $("acts"); ul.textContent = "";
+    var list = Array.isArray(r.actions) ? r.actions : [];
+    var total = num(r.count); if (total === null) total = list.length;
+    $("act-count").textContent = total + (total === 1 ? " swap" : " swaps") + " onchain";
+    if (!list.length) { var e = li("empty"); e.textContent = "No swaps yet. The agent only trades when drift passes the threshold."; ul.appendChild(e); }
+    list.forEach(function (a) {
+      var item = li("act"), bought = a.side === "bought_bnb";
+      var dt = new Date(a.time), ok = !isNaN(dt.getTime());
+      var what = div("what"); var tag = document.createElement("span"); tag.className = "tag " + (bought ? "buy" : "sell"); tag.textContent = bought ? "Buy" : "Sell";
+      what.appendChild(tag); what.appendChild(document.createTextNode(bought ? "Bought BNB with USDT" : "Sold BNB for USDT"));
+      var when = document.createElement("time"); when.className = "when";
+      if (ok) { when.dateTime = dt.toISOString(); when.textContent = dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + ", " + dt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); } else when.textContent = "—";
+      var amt = div("amt", fmt(num(a.stableAmount), 4) + " " + (a.stableSymbol || "USDT"));
+      var tx = document.createElement("a"); tx.className = "tx"; tx.href = safeTx(a); tx.rel = "noopener"; tx.textContent = short(a.hash) + " ↗";
+      tx.setAttribute("aria-label", "View transaction " + short(a.hash) + " on BscScan");
+      item.appendChild(when); item.appendChild(what); item.appendChild(amt); item.appendChild(tx);
+      ul.appendChild(item);
+    });
+    $("act-card").setAttribute("aria-busy", "false"); $("act-err").hidden = true;
+  }
+  function activityFailed(e) {
+    var ul = $("acts"); if (ul.querySelector(".sk")) ul.textContent = "";
+    $("act-err-msg").textContent = e && e.message && e.name !== "AbortError" ? e.message : "Reading the chain is taking too long.";
+    $("act-err").hidden = false; $("act-card").setAttribute("aria-busy", "false");
+    $("act-count").textContent = ul.children.length ? "Showing earlier results" : "";
+  }
+  function loadActivity() {
+    if (!$("acts").children.length) { var ul = $("acts"); for (var i = 0; i < 3; i++) ul.appendChild(li("sk sk-row")); }
+    return fetchJson("/api/activity", 40000).then(renderActivity).catch(activityFailed);
+  }
+
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-retry]"); if (!b) return;
+    if (b.getAttribute("data-retry") === "status") { updateLive("load"); loadStatus(); }
+    else { $("act-err").hidden = true; loadActivity(); }
+  });
+
+  /* copy */
+  $("copy").addEventListener("click", function () {
+    var text = $("curl").textContent, btn = this;
+    function done(ok) { btn.textContent = ok ? "Copied" : "Press Ctrl+C"; $("copy-live").textContent = ok ? "Command copied" : "Copy failed, select the text manually"; setTimeout(function () { btn.textContent = "Copy"; }, 1800); }
+    function fallback() {
+      var r = document.createRange(); r.selectNodeContents($("curl")); var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} done(ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); else fallback();
+  });
+
+  loadStatus(); loadActivity();
+  setInterval(function () { if (!document.hidden) loadStatus(); }, REFRESH_MS);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && lastOk && Date.now() - lastOk > REFRESH_MS) loadStatus(); });
+})();
+</script>
+</body>
+</html>

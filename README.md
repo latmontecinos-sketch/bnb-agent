@@ -31,11 +31,13 @@ Keeps a managed portfolio between WBNB and a test stablecoin at a target weight 
 
 | Path | Purpose |
 |---|---|
+| `/` | landing page: live portfolio, recent swaps, links (`public/index.html`) |
 | `/.well-known/agent-card.json` | A2A agent card |
 | `/.well-known/agent-registration.json` | ERC-8004 registration file |
 | `/api/a2a` | A2A JSON-RPC 2.0 (`message/send`, alias `SendMessage`) |
 | `/api/health` | liveness |
 | `/api/status` | portfolio status |
+| `/api/activity` | the agent's swaps since registration, read from onchain logs (cached 5 min; `LOGS_RPC_URL` overrides the log RPC) |
 | `/api/cron/rebalance` | daily check, requires `CRON_SECRET` (`Authorization: Bearer ...` or `x-cron-secret`) |
 | `/register.html` | registration helper (built from `tools/register.html`) |
 
